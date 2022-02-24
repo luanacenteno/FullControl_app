@@ -26,7 +26,7 @@ app.get('/ping', (req, res) => {
 })
 
 app.get('/users', (req, res) => { 
-    connection.query('SELECT * FROM users', function (error, results, fields) {
+    connection.query('SELECT * FROM usuarios', function (error, results, fields) {
     if (error) {
         throw error;
     }
@@ -35,15 +35,26 @@ app.get('/users', (req, res) => {
     });
 })
 
-app.post('/users', (req, res) => { 
-  const query = 'INSERT INTO users (name, last_name) values ("' + req.body.name + '","' + req.body.lastName + '")';
-  console.log('POST /users query: ', query);
+app.post('/usuarios', (req, res) => { 
+  const query = 'INSERT INTO usuarios (razon, sucursal, representante, direccion, telefono, email, cuil) values ("' + 
+                  req.body.razon + '","' + 
+                  req.body.sucursal + '","' + 
+                  req.body.representante + '","' + 
+                  req.body.direccion + '","' + 
+                  req.body.telefono + '","' + 
+                  req.body.email + '","' + 
+                  req.body.cuil + '")';
+  console.log('POST /usuarios query: ', query);
+
   connection.query(query, function (error, result, fields) {
-  if (error) {
-      throw error;
-  }
-  
-  res.json(result);
+    if (error) {
+        throw error;
+    }
+    
+    res.status(201);
+    res.json({
+      message: "User created successful!"
+    });
   });
 })
 
