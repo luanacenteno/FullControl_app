@@ -12,9 +12,10 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : '7818109',
+  password : '',
   database : 'full_control_db'
 });
+
 connection.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
@@ -25,25 +26,26 @@ app.get('/ping', (req, res) => {
   res.send('pong')
 })
 
-app.get('/users', (req, res) => { 
+app.get('/usuarios', (req, res) => { 
     connection.query('SELECT * FROM usuarios', function (error, results, fields) {
     if (error) {
         throw error;
     }
 
     res.json(results);
+
     });
 })
 
 app.post('/usuarios', (req, res) => { 
-  const query = 'INSERT INTO usuarios (razon, sucursal, representante, direccion, telefono, email, cuil) values ("' + 
-                  req.body.razon + '","' + 
-                  req.body.sucursal + '","' + 
-                  req.body.representante + '","' + 
-                  req.body.direccion + '","' + 
-                  req.body.telefono + '","' + 
+  const query = 'INSERT INTO usuarios (nombre, email, telefono, pass, rol, direccion, rubro) values ("' + 
+                  req.body.nombre + '","' + 
                   req.body.email + '","' + 
-                  req.body.cuil + '")';
+                  req.body.telefono + '","' +
+                  req.body.pass + '","' + 
+                  req.body.rol + '","' + 
+                  req.body.direccion + '","' +  
+                  req.body.rubro + '")';
   console.log('POST /usuarios query: ', query);
 
   connection.query(query, function (error, result, fields) {
@@ -55,8 +57,10 @@ app.post('/usuarios', (req, res) => {
     res.json({
       message: "User created successful!"
     });
+
   });
 })
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
