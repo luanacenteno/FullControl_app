@@ -56,8 +56,6 @@ module.exports = function(app){
         });
     })
 
-
-
     //Continuar auditoria
     app.get('/auditorias/:id', (req, res) => { 
         const id = req.params.id;
@@ -76,6 +74,98 @@ module.exports = function(app){
     
         });
     })
+
+    app.get('/auditorias/detalle/:id', (req, res) => { 
+        const id = req.params.id;
+        if (id && isNaN(id)) {
+            res.status(400)
+            return res.json({
+            message: "Auditoría inválida, se espera un número"
+            });
+        }
+        const query = "SELECT a.id auditoria, a.fecha, t.nombre tecnico, cli.nombre cliente, s.nombre servicio, a.estado, c.nombre categoria," +
+                " r.nombre requisito, n.nombre normativa, n.url, n.detalle detalle, pra.puntaje puntaje_requisito, p.descripcion puntaje_nombre" +
+                " FROM auditorias a" +
+                " left join usuarios t on t.id=a.usuario_id" +
+                " left join usuarios cli on cli.id=a.cliente_id" +
+                " left join servicios s on s.id=a.servicio_id" +
+                " left join puntos_requisitos_auditoria pra on pra.auditoria_id=a.id" +
+                " left join requisitos r on r.id=pra.requisito_id " +
+                " left join normativas n on n.id=r.normativa_id " +
+                " left join categorias c on c.id=r.categoria_id" +
+                " left join puntajes p on p.valor=pra.puntaje" +
+                " where pra.puntaje != -1 and a.id = " + id +
+                " group by auditoria, fecha, tecnico, cliente, servicio, estado, categoria, requisito, puntaje_requisito" +
+                " order by categoria;"
+
+        connection.query(query, async function (error, queryResults, fields) {
+            if (error) {
+                throw error;
+            }
+
+            let i = 0;
+            let categorias = {};
+            let puntaje_total = 0;
+            for (const result of queryResults) {
+                const requisito_categoria = {
+                    nombre: result.requisito,
+                    normativa: result.normativa,
+                    url: result.url,
+                    puntaje: result.puntaje_requisito,
+                    puntaje_nombre: result.puntaje_nombre,
+                    detalle: result.detalle,
+                }
+                if (categorias[result.categoria]) {
+                    categorias[result.categoria].requisitos.push(requisito_categoria);
+                    categorias[result.categoria].puntaje_total += requisito_categoria.puntaje;
+                    i++;
+                } else {
+                    categorias[result.categoria] = {
+                        requisitos: [
+                            requisito_categoria
+                        ],
+                        puntaje_total: requisito_categoria.puntaje
+                    };
+                    i++;
+                }
+                puntaje_total += requisito_categoria.puntaje;
+                if (queryResults.length == i) {
+                    let puntaje_maximo = 0;
+                    for (const r of queryResults) {
+                        console.log('r', r, 'r.categoria', r.categoria);
+                        categorias[r.categoria].puntaje_maximo = categorias[r.categoria].requisitos.length * 2;
+                        categorias[r.categoria].puntaje_porcentaje = Math.round(categorias[r.categoria].puntaje_total * 100 / categorias[r.categoria].puntaje_maximo);
+                        for (const requisito of categorias[r.categoria].requisitos) {
+                            if (requisito.puntaje < 0) {
+                                console.log('dasd1a6s5d4165as4ds?**********************************--------------------------------');
+                            }
+                            puntaje_maximo += 2;
+                        }
+                    }
+                    res.json({
+                        auditoria_id: queryResults[0].auditoria,
+                        fecha: queryResults[0].fecha,
+                        tecnico: queryResults[0].tecnico,
+                        cliente: queryResults[0].cliente,
+                        servicio: queryResults[0].servicio,
+                        estado: queryResults[0].estado,
+                        puntaje_maximo: i * 2,
+                        puntaje_total: puntaje_total,
+                        puntaje_porcentaje: Math.round(puntaje_total * 100 / (i * 2)),
+                        categorias: categorias
+                    });
+                }
+            };
+                    
+        });
+    })
+
+    async function getRequisitosPorCategoria(results) {
+        let categorias = [];
+        
+        return categorias;
+    }
+    
 /*
     //Continuar auditoria
     app.get('/auditorias', (req, res) => { 
@@ -111,13 +201,17 @@ module.exports = function(app){
     })
 
     app.get('/usuarios/auditoria', (req, res) => { 
-        let where = "";
-        if (req.query.rol) {
-            where = req.query.rol ? " WHERE rol = '" + req.query.rol + "'" : "";
-        }
-        const join = "left join auditorias a on u.id=a.cliente_id and estado = 'abierta'";
-        const orderBy = " order by nombre";
-        connection.query('SELECT a.id as auditoria_id, a.fecha, u.id, u.nombre FROM usuarios u ' + join + where + orderBy, function (error, results, fields) {
+        const query = "SELECT a.id as auditoria_id, a.fecha, u.id, u.nombre, GROUP_CONCAT(distinct c.nombre SEPARATOR ' | ') categorias " +
+                      " FROM usuarios u" +
+                      " left join auditorias a on u.id=a.cliente_id and estado = 'abierta'" +
+                      " left join puntos_requisitos_auditoria pra on pra.auditoria_id=a.id" +
+                      " left join requisitos r on r.id=pra.requisito_id " +
+                      " left join categorias c on c.id=r.categoria_id" +
+                      " where rol='cliente'" +
+                      " group by auditoria_id, a.fecha, id, u.nombre" +
+                      " order by auditoria_id desc, nombre";
+        console.log('query', query);
+        connection.query(query, function (error, results, fields) {
         if (error) {
             throw error;
         }
