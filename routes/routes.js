@@ -56,6 +56,27 @@ module.exports = function(app){
         });
     })
 
+    //Cerrar auditoria
+    app.put('/auditorias/:id', (req, res) => {
+        const id = req.params.id;
+        if (id && isNaN(id)) {
+            res.status(400)
+            return res.json({
+            message: "Auditoría inválida, se espera un número"
+            });
+        }
+        const where = id ? " WHERE id = " + id : "";
+        connection.query("UPDATE auditorias SET estado = 'cerrada'"  + where, function (error, results, fields) {
+        if (error) {
+            throw error;
+        }
+        res.json(results[0]);
+    
+        });
+       
+    })
+
+
     //Continuar auditoria
     app.get('/auditorias/:id', (req, res) => { 
         const id = req.params.id;
