@@ -236,7 +236,7 @@ module.exports = function(app){
                       " left join requisitos r on r.id=pra.requisito_id " +
                       " left join categorias c on c.id=r.categoria_id" +
                       " where rol='cliente'" +
-                      " group by auditoria_id, a.fecha, id, u.nombre" +
+                      " group by a.id, a.fecha, id, u.nombre" +
                       " order by auditoria_id desc, nombre";
         console.log('query', query);
         connection.query(query, function (error, results, fields) {
