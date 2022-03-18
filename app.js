@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 443;
 
 app.listen(port, () => {
   console.log(`fullcontrol-db Rest API listening on port ${port}`);
