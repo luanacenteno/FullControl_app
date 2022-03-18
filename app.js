@@ -7,10 +7,6 @@ app.listen(port, () => {
   console.log(`fullcontrol-db Rest API listening on port ${port}`);
 });
 
-app.get("/", async (req, res) => {
-  res.json({ status: "Full Control Ready to roll!"});
-});
-
 const cors = require('cors');
 var bodyParser = require('body-parser');
 

@@ -1,7 +1,7 @@
 module.exports = function(app){
 
     var mysql      = require('mysql');
-    var connection = mysql.createPool({
+    var connection = mysql.createConnection({
         // socketPath: '/cloudsql/fullcontrol-344313:us-west1:full-control-db',
         host: '34.105.46.83',
         user: 'root',
