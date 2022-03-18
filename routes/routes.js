@@ -17,7 +17,6 @@ module.exports = function(app){
     });
 
     app.get('/ping', (req, res) => { 
-        
         res.json({"message": "pong"});
     });
 
