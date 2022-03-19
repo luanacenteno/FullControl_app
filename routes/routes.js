@@ -1,6 +1,6 @@
 module.exports = function(app){
 
-    var mysql      = require('mysql');
+    var mysql = require('mysql');
     var connection = mysql.createConnection({
         // socketPath: '/cloudsql/fullcontrol-344313:us-west1:full-control-db',
         host: '34.105.46.83',
@@ -123,7 +123,7 @@ module.exports = function(app){
                 " left join categorias c on c.id=r.categoria_id" +
                 " left join puntajes p on p.valor=pra.puntaje" +
                 " where pra.puntaje != -1 and a.id = " + id +
-                " group by auditoria, fecha, tecnico, cliente, servicio, estado, categoria, requisito, puntaje_requisito" +
+                //" group by auditoria, fecha, tecnico, cliente, servicio, estado, categoria, requisito, puntaje_requisito" +
                 " order by categoria;"
 
         connection.query(query, async function (error, queryResults, fields) {
@@ -236,7 +236,7 @@ module.exports = function(app){
                       " left join requisitos r on r.id=pra.requisito_id " +
                       " left join categorias c on c.id=r.categoria_id" +
                       " where rol='cliente'" +
-                      " group by a.id, a.fecha, id, u.nombre" +
+                      " group by a.id, a.fecha, u.id, u.nombre" +
                       " order by auditoria_id desc, nombre";
         console.log('query', query);
         connection.query(query, function (error, results, fields) {
